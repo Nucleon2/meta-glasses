@@ -10,8 +10,9 @@
 		15F6E99F15F8F88AC2C6233C /* PCMConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03815771EAFAF2F72BD38511 /* PCMConverter.swift */; };
 		301EC84E02BDF35C4BEC57B7 /* HexDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23FA62C6C51FA8CB47BC850A /* HexDecoder.swift */; };
 		34614FA96479B9DD537D0C19 /* MiniMaxModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE83B5574084C2F8C3160DB8 /* MiniMaxModels.swift */; };
-		42D11317D5A05298335C228A /* MetaWearables in Frameworks */ = {isa = PBXBuildFile; productRef = 16F618A6FF9C02A3DD676FD4 /* MetaWearables */; };
+		42D11317D5A05298335C228A /* MWDATCore in Frameworks */ = {isa = PBXBuildFile; productRef = EE9423D4A1C36D2A080D241C /* MWDATCore */; };
 		538BA9A5DC37527B9AD6A923 /* MiniMaxClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EB16A7C9E1C75623CEB8CB6 /* MiniMaxClient.swift */; };
+		62B5CF6D008418B3AEDFB643 /* MWDATCamera in Frameworks */ = {isa = PBXBuildFile; productRef = 3C2342B33443F58AC4C0B064 /* MWDATCamera */; };
 		6866398FB3D4A3ABB06A9A89 /* PCMConverterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A72967B8CC7ADC16C73799C /* PCMConverterTests.swift */; };
 		6F22DC2B5D0F3DF2E53CF8C4 /* MiniMaxClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E237636CDBA504F27786912 /* MiniMaxClientTests.swift */; };
 		70F8D19C042BF13DD29C4331 /* CameraPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09E336F8611FA63AB930CC3A /* CameraPipeline.swift */; };
@@ -81,7 +82,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				42D11317D5A05298335C228A /* MetaWearables in Frameworks */,
+				42D11317D5A05298335C228A /* MWDATCore in Frameworks */,
+				62B5CF6D008418B3AEDFB643 /* MWDATCamera in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -227,7 +229,8 @@
 			);
 			name = RayBanMiniMax;
 			packageProductDependencies = (
-				16F618A6FF9C02A3DD676FD4 /* MetaWearables */,
+				EE9423D4A1C36D2A080D241C /* MWDATCore */,
+				3C2342B33443F58AC4C0B064 /* MWDATCamera */,
 			);
 			productName = RayBanMiniMax;
 			productReference = E65B98EC54A9E6B049B2EB43 /* RayBanMiniMax.app */;
@@ -280,7 +283,7 @@
 			mainGroup = DE39C56166B6B746C52C50E0;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				74F6CD5D5B68A3F7EDBEC440 /* XCRemoteSwiftPackageReference "MetaWearables-SDK-iOS" */,
+				E8FEF2C99FDA8E98C3A970F1 /* XCRemoteSwiftPackageReference "meta-wearables-dat-ios" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 5688A127B263380A17A8F728 /* Products */;
@@ -435,7 +438,7 @@
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 5.9;
+				SWIFT_VERSION = 6.0;
 			};
 			name = Debug;
 		};
@@ -531,7 +534,7 @@
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
-				SWIFT_VERSION = 5.9;
+				SWIFT_VERSION = 6.0;
 			};
 			name = Release;
 		};
@@ -586,21 +589,26 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		74F6CD5D5B68A3F7EDBEC440 /* XCRemoteSwiftPackageReference "MetaWearables-SDK-iOS" */ = {
+		E8FEF2C99FDA8E98C3A970F1 /* XCRemoteSwiftPackageReference "meta-wearables-dat-ios" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/meta-quest/MetaWearables-SDK-iOS";
+			repositoryURL = "https://github.com/facebook/meta-wearables-dat-ios";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.0;
+				minimumVersion = 0.8.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		16F618A6FF9C02A3DD676FD4 /* MetaWearables */ = {
+		3C2342B33443F58AC4C0B064 /* MWDATCamera */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 74F6CD5D5B68A3F7EDBEC440 /* XCRemoteSwiftPackageReference "MetaWearables-SDK-iOS" */;
-			productName = MetaWearables;
+			package = E8FEF2C99FDA8E98C3A970F1 /* XCRemoteSwiftPackageReference "meta-wearables-dat-ios" */;
+			productName = MWDATCamera;
+		};
+		EE9423D4A1C36D2A080D241C /* MWDATCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E8FEF2C99FDA8E98C3A970F1 /* XCRemoteSwiftPackageReference "meta-wearables-dat-ios" */;
+			productName = MWDATCore;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -24,6 +24,14 @@
 	<true/>
 	<key>MINIMAX_API_KEY</key>
 	<string>$(MINIMAX_API_KEY)</string>
+	<key>MWDAT</key>
+	<dict>
+		<key>Analytics</key>
+		<dict>
+			<key>OptOut</key>
+			<true/>
+		</dict>
+	</dict>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>RayBan AI uses Bluetooth to connect to your Ray-Ban Meta glasses.</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
@@ -33,7 +41,7 @@
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>RayBan AI communicates with your Ray-Ban Meta glasses on the local network.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>RayBan AI needs microphone access to capture your voice through the glasses for AI queries.</string>
+	<string>RayBan AI needs microphone access to capture your voice through the iPhone for AI queries.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>RayBan AI uses speech recognition to convert your spoken queries into text for the AI assistant.</string>
 	<key>UIApplicationSceneManifest</key>

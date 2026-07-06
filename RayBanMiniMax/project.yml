@@ -9,15 +9,15 @@ options:
   generateEmptyDirectories: true
 settings:
   base:
-    SWIFT_VERSION: "5.9"
+    SWIFT_VERSION: "6.0"
     IPHONEOS_DEPLOYMENT_TARGET: "17.0"
     DEVELOPMENT_TEAM: ""
     CODE_SIGN_STYLE: Automatic
     ENABLE_USER_SCRIPT_SANDBOXING: NO
 packages:
-  MetaWearables:
-    url: https://github.com/meta-quest/MetaWearables-SDK-iOS
-    from: "1.0.0"
+  MetaWearablesDAT:
+    url: https://github.com/facebook/meta-wearables-dat-ios
+    from: "0.8.0"
 targets:
   RayBanMiniMax:
     type: application
@@ -52,13 +52,16 @@ targets:
         UIBackgroundModes:
           - audio
           - bluetooth-central
-        NSMicrophoneUsageDescription: "RayBan AI needs microphone access to capture your voice through the glasses for AI queries."
+        NSMicrophoneUsageDescription: "RayBan AI needs microphone access to capture your voice through the iPhone for AI queries."
         NSCameraUsageDescription: "RayBan AI needs camera access to receive the live view from your Ray-Ban Meta glasses."
         NSSpeechRecognitionUsageDescription: "RayBan AI uses speech recognition to convert your spoken queries into text for the AI assistant."
         NSBluetoothAlwaysUsageDescription: "RayBan AI uses Bluetooth to connect to your Ray-Ban Meta glasses."
         NSBluetoothPeripheralUsageDescription: "RayBan AI uses Bluetooth to connect to your Ray-Ban Meta glasses."
         NSLocalNetworkUsageDescription: "RayBan AI communicates with your Ray-Ban Meta glasses on the local network."
         MINIMAX_API_KEY: "$(MINIMAX_API_KEY)"
+        MWDAT:
+          Analytics:
+            OptOut: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.minimax.rayban.RayBanMiniMax
@@ -67,7 +70,10 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
     dependencies:
-      - package: MetaWearables
+      - package: MetaWearablesDAT
+        product: MWDATCore
+      - package: MetaWearablesDAT
+        product: MWDATCamera
   RayBanMiniMaxTests:
     type: bundle.unit-test
     platform: iOS
@@ -80,7 +86,6 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.minimax.rayban.RayBanMiniMaxTests
         GENERATE_INFOPLIST_FILE: YES
-
 schemes:
   RayBanMiniMax:
     build:

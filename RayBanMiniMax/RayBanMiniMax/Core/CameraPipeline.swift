@@ -2,26 +2,23 @@
 //  CameraPipeline.swift
 //  RayBanMiniMax
 //
-//  Subscribes to the DAT SDK's camera publisher and exposes the most recent
-//  JPEG frame for the AI vision pipeline.
+//  Receives JPEG frames from the DATBridge (the real Meta Wearables SDK
+//  video stream) and exposes the most recent frame for the AI vision
+//  pipeline. We keep only the latest frame to bound memory; older frames
+//  are released as soon as a newer one arrives.
 //
-//  The Meta Ray-Ban Gen 2 streams a single JPEG frame at roughly 1 fps. The
-//  pipeline stores only the most recent frame to keep memory bounded; older
-//  frames are released immediately as soon as a newer one arrives.
-//
-//  Thread-safety: a serial actor protects the storage. SwiftUI consumers
-//  receive a snapshot via the @MainActor `latestFrame` published property.
+//  Thread-safety: the @MainActor isolation guarantees serialized access
+//  from any view or view model.
 //
 
 import Foundation
 import Combine
 import UIKit
 
-/// A decoded preview frame for the UI. We keep the JPEG bytes as well so
-/// the AI pipeline can re-encode or attach them to a request without
-/// re-decoding the same data.
+/// A decoded preview frame for the UI. JPEG bytes are retained so the AI
+/// pipeline can base64-encode them without re-decoding.
 struct CameraFrame: Equatable {
-    let id: UUID = UUID()
+    let id: UUID
     let jpegData: Data
     let base64: String
     let capturedAt: Date
@@ -29,7 +26,6 @@ struct CameraFrame: Equatable {
     let pixelHeight: Int
     let uiImage: UIImage?
 
-    /// Convenience: size of the underlying JPEG in KB. Used in the UI.
     var sizeInBytes: Int { jpegData.count }
     var sizeInKB: Double { Double(jpegData.count) / 1024.0 }
 }
@@ -46,103 +42,102 @@ final class CameraPipeline: ObservableObject {
 
     // MARK: - Tunables
 
-    /// Max JPEG size we will keep in memory. Anything bigger is downscaled.
-    /// 4 MB is more than enough for a 12 MP glasses camera and bounds RAM use.
+    /// Max JPEG size we'll keep in memory. Larger frames are downscaled.
     static let maxFrameBytes: Int = 4 * 1024 * 1024
 
-    /// Target JPEG quality for any re-encoded frames (1.0 = lossless).
+    /// Quality used when re-encoding oversized frames.
     static let reencodeQuality: CGFloat = 0.85
+
+    /// Soft cap on frames in the rolling FPS window (last 60s).
+    static let fpsWindowSeconds: Double = 60.0
 
     // MARK: - Internals
 
-    private var streamTask: Task<Void, Never>?
+    private weak var bridge: DATBridge?
     private var fpsWindow: [Date] = []
-    private var lastFrameAt: Date?
 
-    deinit {
-        streamTask?.cancel()
-    }
+    // MARK: - Lifecycle
 
-    // MARK: - Stream lifecycle
-
-    /// Begin a streaming subscription. Pass a closure that yields JPEG data.
-    /// In production this is wired up to the DAT SDK's camera publisher;
-    /// the closure abstraction lets us mock the stream in unit tests.
-    ///
-    /// - Parameter source: Async sequence (or closure-based source) that
-    ///   yields raw JPEG `Data` for each new frame.
-    func start<S: AsyncSequence>(source: S) where S.Element == Data {
+    /// Attach a bridge and start streaming from it.
+    func start(with bridge: DATBridge) async {
         guard !isStreaming else { return }
+        self.bridge = bridge
         isStreaming = true
         lastError = nil
-        Logger.info("Camera stream started", category: .camera)
-        streamTask = Task { [weak self] in
-            for await jpeg in source {
-                guard let self else { return }
-                self.ingest(jpegData: jpeg)
-                if Task.isCancelled { break }
+        do {
+            try await bridge.startVideoStream { [weak self] datFrame in
+                // Already on MainActor (the bridge dispatches here).
+                self?.ingest(datFrame: datFrame)
             }
-            await self?.markStopped()
+            Logger.info("Camera pipeline attached to DAT bridge stream", category: .camera)
+        } catch {
+            isStreaming = false
+            lastError = error.localizedDescription
+            Logger.error("Failed to start camera pipeline: \(error.localizedDescription)",
+                         category: .camera)
         }
     }
 
-    /// Synchronous start that uses a callback. Useful when the SDK exposes
-    /// a Combine publisher or a delegate.
-    func startWithCallback(_ callback: @escaping () async -> AsyncStream<Data>.Continuation?) {
-        // We model a one-shot helper to keep the API symmetric; the typical
-        // usage is to call `start(source:)` with an `AsyncStream`.
-        let stream = AsyncStream<Data> { continuation in
-            Task {
-                if let cont = await callback() {
-                    cont.yield(Data()) // no-op placeholder, real glue in SessionManager
-                }
-            }
-        }
-        start(source: stream)
-    }
-
+    /// Stop streaming and clear cached frames.
     func stop() {
-        streamTask?.cancel()
-        streamTask = nil
+        bridge?.stopVideoStream()
+        bridge = nil
         isStreaming = false
-        Logger.info("Camera stream stopped", category: .camera)
+        clear()
+        Logger.info("Camera pipeline stopped", category: .camera)
     }
 
     // MARK: - Frame ingestion
 
-    /// Receive a raw JPEG frame. Replaces any previous frame immediately.
-    /// Bounded by `maxFrameBytes` to keep memory in check; oversized frames
-    /// are downscaled via UIKit.
-    func ingest(jpegData raw: Data) {
+    /// Receive a raw frame from the DAT bridge. Bounded by `maxFrameBytes`.
+    private func ingest(datFrame: DATVideoFrame) {
         let data: Data
-        if raw.count > Self.maxFrameBytes {
-            guard let resized = downscale(jpegData: raw) else {
-                Logger.warn("Frame too large and could not be downscaled (\(raw.count) B)",
+        if datFrame.jpegData.count > Self.maxFrameBytes {
+            guard let resized = downscale(jpegData: datFrame.jpegData) else {
+                Logger.warn("Frame too large and could not be downscaled (\(datFrame.jpegData.count) B)",
                             category: .camera)
                 return
             }
             data = resized
         } else {
-            data = raw
+            data = datFrame.jpegData
         }
 
-        let image = UIImage(data: data)
+        let image = datFrame.uiImage ?? UIImage(data: data)
         let frame = CameraFrame(
+            id: UUID(),
             jpegData: data,
             base64: data.base64EncodedString(),
-            capturedAt: Date(),
-            pixelWidth: Int(image?.size.width ?? 0),
-            pixelHeight: Int(image?.size.height ?? 0),
+            capturedAt: datFrame.capturedAt,
+            pixelWidth: datFrame.width > 0 ? datFrame.width : Int(image?.size.width ?? 0),
+            pixelHeight: datFrame.height > 0 ? datFrame.height : Int(image?.size.height ?? 0),
             uiImage: image
         )
 
         latestFrame = frame
         frameCount += 1
         updateFPS()
-        lastFrameAt = frame.capturedAt
     }
 
-    /// Discard the cached frame (e.g. when the user logs out).
+    /// Inject a frame that came from somewhere other than the live stream
+    /// (e.g. a `DATCapturedPhoto` from a programmatic capture).
+    func inject(jpegData: Data) {
+        let image = UIImage(data: jpegData)
+        let frame = CameraFrame(
+            id: UUID(),
+            jpegData: jpegData,
+            base64: jpegData.base64EncodedString(),
+            capturedAt: Date(),
+            pixelWidth: Int(image?.size.width ?? 0),
+            pixelHeight: Int(image?.size.height ?? 0),
+            uiImage: image
+        )
+        latestFrame = frame
+        frameCount += 1
+        updateFPS()
+    }
+
+    /// Drop the cached frame.
     func clear() {
         latestFrame = nil
         frameCount = 0
@@ -152,27 +147,20 @@ final class CameraPipeline: ObservableObject {
 
     // MARK: - Helpers
 
-    private func markStopped() {
-        isStreaming = false
-    }
-
     private func updateFPS() {
         let now = Date()
         fpsWindow.append(now)
-        // Keep only frames from the last 60 seconds.
-        let cutoff = now.addingTimeInterval(-60)
+        let cutoff = now.addingTimeInterval(-Self.fpsWindowSeconds)
         fpsWindow.removeAll { $0 < cutoff }
-        framesPerMinute = Double(fpsWindow.count)
+        framesPerMinute = Double(fpsWindow.count) * (60.0 / Self.fpsWindowSeconds)
     }
 
-    /// Downscale an oversized JPEG by decoding and re-encoding at 85% quality.
+    /// Downscale an oversized JPEG to keep memory bounded.
     private func downscale(jpegData: Data) -> Data? {
         guard let image = UIImage(data: jpegData) else { return nil }
         let maxSide: CGFloat = 2048
         let scale = min(1.0, maxSide / max(image.size.width, image.size.height))
-        if scale >= 1.0 {
-            return jpegData
-        }
+        if scale >= 1.0 { return jpegData }
         let newSize = CGSize(width: image.size.width * scale,
                              height: image.size.height * scale)
         let renderer = UIGraphicsImageRenderer(size: newSize)

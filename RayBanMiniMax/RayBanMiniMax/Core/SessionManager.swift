@@ -3,20 +3,18 @@
 //  RayBanMiniMax
 //
 //  Central orchestrator. Wires together:
-//   * MetaWearables DAT SDK connection
-//   * AudioPipeline (mic capture + TTS playback)
-//   * CameraPipeline (vision frames)
-//   * SpeechRecognizer (STT)
+//   * DATBridge (real Meta Wearables SDK: video stream + photo capture)
+//   * AudioPipeline (iPhone mic + speaker for the voice loop)
+//   * CameraPipeline (consumes DATBridge video frames, base64 for AI)
+//   * SpeechRecognizer (on-device STT from the iPhone mic)
 //   * MiniMaxClient (chat + TTS)
 //   * ConversationStore (rolling context)
 //   * ToolRegistry (function calling)
 //
-//  The flow is:
-//
-//    User speaks -> AudioPipeline chunks -> SpeechRecognizer -> transcript
-//    -> MiniMaxClient.chatCompletion(messages + latest frame)
-//    -> (optional) ToolRegistry.execute tool calls
-//    -> MiniMaxClient.textToSpeech(text) -> AudioPipeline.playMP3
+//  Flow:
+//    User speaks → iPhone mic → AudioPipeline chunks → SpeechRecognizer
+//      → transcript → MiniMax chat (with latest DAT frame)
+//      → MiniMax TTS → iPhone speaker
 //
 
 import Foundation
@@ -27,26 +25,35 @@ import SwiftUI
 /// High-level connection state surfaced to the UI.
 enum ConnectionState: Equatable {
     case idle
-    case connecting
-    case connected
-    case reconnecting
+    case configuring
+    case registering
+    case ready
+    case streaming
     case failed(String)
+    case permissionDenied
 
     var label: String {
         switch self {
-        case .idle:           return "Idle"
-        case .connecting:     return "Connecting…"
-        case .connected:      return "Connected"
-        case .reconnecting:   return "Reconnecting…"
-        case .failed(let m):  return "Failed: \(m)"
+        case .idle:               return "Idle"
+        case .configuring:        return "Configuring…"
+        case .registering:        return "Registering with Meta…"
+        case .ready:              return "Ready"
+        case .streaming:          return "Streaming"
+        case .permissionDenied:   return "Camera permission needed"
+        case .failed(let m):      return "Failed: \(m)"
         }
     }
 
     var isActive: Bool {
         switch self {
-        case .connected, .reconnecting: return true
+        case .ready, .streaming, .registering: return true
         default: return false
         }
+    }
+
+    var isStreaming: Bool {
+        if case .streaming = self { return true }
+        return false
     }
 }
 
@@ -60,6 +67,7 @@ final class SessionManager: ObservableObject {
     let stt = SpeechRecognizer()
     let store = ConversationStore()
     let tools = ToolRegistry()
+    let bridge = DATBridge()
 
     // MARK: - Published state
 
@@ -71,31 +79,54 @@ final class SessionManager: ObservableObject {
 
     // MARK: - Internals
 
-    private var chunkSubscription: AnyCancellable?
-    private var reconnectTask: Task<Void, Never>?
-
-    // The DAT SDK is loaded lazily and weakly; we don't import the module
-    // unconditionally because the package may not be available when tests
-    // run. The orchestrator calls into the SDK through `dat` below.
-    private var dat: DATBridge?
-
-    // MARK: - Init
+    private var stateObservation: Task<Void, Never>?
 
     init(api: MiniMaxClient = MiniMaxClient()) {
         self.api = api
+        observeBridgeState()
+    }
+
+    private func observeBridgeState() {
+        // Bridge is @MainActor; poll its published state.
+        // (In a real implementation we'd use a Combine bridge.)
+        stateObservation = Task { [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(nanoseconds: 300_000_000)
+                guard let self else { return }
+                self.syncFromBridge()
+            }
+        }
+    }
+
+    private func syncFromBridge() {
+        let bridgeState = bridge.state
+        let mapped: ConnectionState
+        switch bridgeState {
+        case .idle:               mapped = .idle
+        case .configuring:        mapped = .configuring
+        case .registering:        mapped = .registering
+        case .ready:              mapped = .ready
+        case .streaming:          mapped = .streaming
+        case .permissionDenied:   mapped = .permissionDenied
+        case .failed(let m):      mapped = .failed(m)
+        }
+        if connection != mapped {
+            connection = mapped
+        }
     }
 
     // MARK: - Bootstrap
 
-    /// One-shot startup. Configures audio, requests permissions, and tries
-    /// to connect to the glasses. Failures are surfaced in `lastError`.
+    /// One-shot startup. Configures audio, requests permissions, bootstraps
+    /// the DAT bridge, and starts the video stream.
     func bootstrap() {
         Task {
             await stt.requestAuthorization()
             do {
                 try audio.configureSession()
             } catch {
-                Logger.warn("Audio session config failed: \(error.localizedDescription)", category: .audio)
+                Logger.warn("Audio session config failed: \(error.localizedDescription)",
+                            category: .audio)
             }
             await connect()
         }
@@ -103,51 +134,31 @@ final class SessionManager: ObservableObject {
 
     // MARK: - Connection
 
-    /// Connect (or reconnect) to the Meta Ray-Ban Gen 2 glasses.
+    /// Connect / start streaming. Idempotent.
     func connect() async {
-        guard !connection.isActive else { return }
-        connection = .connecting
+        guard !connection.isActive && !connection.isStreaming else { return }
+        await bridge.bootstrap()
+        await camera.start(with: bridge)
+        // Mic capture (for STT) — separate from the bridge.
         do {
-            let bridge = DATBridge()
-            try await bridge.connect()
-            self.dat = bridge
-
-            // Wire audio: tap the SDK's audio input node, then start playback.
-            if let audioInput = bridge.audioInputNode() {
-                try audio.startCapture(from: audioInput)
-            }
-            try audio.preparePlayback()
-
-            // Wire camera: forward the SDK's JPEG stream to the camera pipeline.
-            let frames = bridge.cameraStream()
-            camera.start(source: frames)
-
-            // Wire STT: subscribe to audio chunks for optional on-device STT.
-            chunkSubscription = audio.chunkPublisher
-                .sink { [weak self] event in
-                    self?.handleAudioChunk(event)
-                }
-
-            connection = .connected
-            Logger.info("Session connected", category: .session)
+            try audio.startCapture()
         } catch {
-            connection = .failed(error.localizedDescription)
-            lastError = "Connection failed: \(error.localizedDescription)"
-            Logger.error("Connect failed: \(error.localizedDescription)", category: .session)
+            Logger.warn("Mic capture failed: \(error.localizedDescription)", category: .audio)
         }
+        do {
+            try audio.preparePlayback()
+        } catch {
+            Logger.warn("Playback prepare failed: \(error.localizedDescription)", category: .audio)
+        }
+        Logger.info("Session connected", category: .session)
     }
 
     /// Disconnect gracefully and stop all subsystems.
     func disconnect() {
-        reconnectTask?.cancel()
-        reconnectTask = nil
-        chunkSubscription?.cancel()
-        chunkSubscription = nil
         audio.shutdown()
         camera.stop()
         stt.stop()
-        dat?.disconnect()
-        dat = nil
+        bridge.shutdown()
         connection = .idle
         Logger.info("Session disconnected", category: .session)
     }
@@ -155,29 +166,26 @@ final class SessionManager: ObservableObject {
     /// Reconnect after a transient failure.
     func reconnect() {
         disconnect()
-        connection = .reconnecting
         Task {
             try? await Task.sleep(nanoseconds: 1_500_000_000)
             await connect()
         }
     }
 
-    // MARK: - Audio chunks (from AudioPipeline)
+    // MARK: - Programmatic photo capture
 
-    private func handleAudioChunk(_ event: AudioChunkEvent) {
-        // We don't run STT on every chunk. The SessionManager exposes
-        // `transcribeLatestWindow()` for when we want to flush a window of
-        // audio into the recognizer. For now, just log activity.
-        if event.rms > 0.05 {
-            Logger.debug("mic chunk rms=\(event.rms)", category: .audio)
-        }
+    /// Capture a still through the glasses' DAT bridge. The frame is also
+    /// injected into the camera pipeline so the UI updates immediately.
+    func capturePhoto() async throws -> Data {
+        let photo = try await bridge.capturePhoto()
+        camera.inject(jpegData: photo.jpegData)
+        return photo.jpegData
     }
 
     // MARK: - Main AI loop
 
-    /// Run a single AI turn given a user transcript (already produced by STT
-    /// or a manual text input). The latest camera frame is attached when
-    /// `attachLatestFrame` is true.
+    /// Run a single AI turn given a user transcript. Attaches the latest
+    /// camera frame from the glasses if `attachLatestFrame` is true.
     func ask(transcript text: String, attachLatestFrame: Bool = true) async {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
@@ -185,9 +193,8 @@ final class SessionManager: ObservableObject {
         isThinking = true
         defer { isThinking = false }
 
-        // Build the user message (with optional image).
-        let userContent: MessageContent
         let frame = attachLatestFrame ? camera.latestFrame : nil
+        let userContent: MessageContent
         if let frame {
             var parts: [ContentPart] = [
                 ContentPart(type: .text, text: trimmed, imageURL: nil)
@@ -212,7 +219,6 @@ final class SessionManager: ObservableObject {
             hasImage: frame != nil
         ))
 
-        // Build messages (system + history).
         let toolDefs = tools.allDefinitions
         let useTools = !toolDefs.isEmpty
         let messages = store.messagesForRequest(
@@ -229,7 +235,6 @@ final class SessionManager: ObservableObject {
                 tools: useTools ? toolDefs : nil
             )
 
-            // If the model requested tool calls, execute them and re-query.
             var final = first
             if first.hasToolCalls {
                 let toolMessages = await runTools(first.toolCalls)
@@ -263,8 +268,6 @@ final class SessionManager: ObservableObject {
         }
     }
 
-    /// Execute a batch of tool calls and return the corresponding
-    /// `role: "tool"` messages ready to feed back into the model.
     private func runTools(_ calls: [ToolCall]) async -> [ChatMessage] {
         var messages: [ChatMessage] = []
         for call in calls {
@@ -292,7 +295,6 @@ final class SessionManager: ObservableObject {
 
     // MARK: - TTS playback
 
-    /// Speak the given text through the glasses using MiniMax TTS.
     func speak(_ text: String) async {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
@@ -313,14 +315,10 @@ final class SessionManager: ObservableObject {
         }
     }
 
-    /// Stop any in-flight playback.
-    func stopSpeaking() {
-        audio.stopPlayback()
-    }
+    func stopSpeaking() { audio.stopPlayback() }
 
     // MARK: - STT -> AI helper
 
-    /// Listen for one utterance and feed it straight to the AI.
     func listenAndAsk() async {
         do {
             let transcript = try await stt.listenOnce()
@@ -329,22 +327,6 @@ final class SessionManager: ObservableObject {
             lastError = "STT error: \(error.localizedDescription)"
             Logger.error("listenAndAsk failed: \(error.localizedDescription)", category: .stt)
         }
-    }
-
-    // MARK: - Camera capture (programmatic)
-
-    /// Capture a still photo through the DAT bridge. The bridge routes the
-    /// request to the SDK on real glasses; the simulator path returns a
-    /// synthetic JPEG so the UI stays usable without hardware.
-    func capturePhoto() async throws -> Data {
-        guard let dat else {
-            throw NSError(domain: "SessionManager", code: 1,
-                          userInfo: [NSLocalizedDescriptionKey: "Not connected to glasses."])
-        }
-        let data = try await dat.capturePhoto()
-        // Immediately feed it into the camera pipeline so the user sees it.
-        camera.ingest(jpegData: data)
-        return data
     }
 
     // MARK: - Conversation management
