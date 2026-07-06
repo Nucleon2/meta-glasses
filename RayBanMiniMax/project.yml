@@ -80,3 +80,22 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.minimax.rayban.RayBanMiniMaxTests
         GENERATE_INFOPLIST_FILE: YES
+
+schemes:
+  RayBanMiniMax:
+    build:
+      targets:
+        RayBanMiniMax: all
+        RayBanMiniMaxTests: [test]
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - RayBanMiniMaxTests
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release
