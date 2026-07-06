@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Config.template.plist
+
+  Copy this file to Config.plist and fill in your MiniMax API key.
+
+      cp RayBanMiniMax/Resources/Config.template.plist \
+         RayBanMiniMax/Resources/Config.plist
+
+  Then open Config.plist and replace the placeholder below with your real
+  key. Config.plist is git-ignored.
+
+  You can get a key at: https://platform.minimaxi.com
+-->
+<plist version="1.0">
+<dict>
+    <key>MINIMAX_API_KEY</key>
+    <string>YOUR_MINIMAX_API_KEY_HERE</string>
+</dict>
+</plist>
