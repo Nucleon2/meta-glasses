@@ -344,7 +344,7 @@ final class RealDATBridge: DATBridgeProtocol {
 
         // `VideoFrame` exposes a `uiImage` and `imageBuffer`; we re-encode
         // to JPEG at a moderate quality so the bytes are stable for base64.
-        let image = frame.uiImage
+        let image = frame.makeUIImage()
         let jpeg: Data
         if let image, let encoded = image.jpegData(compressionQuality: 0.7) {
             jpeg = encoded
@@ -369,10 +369,11 @@ final class RealDATBridge: DATBridgeProtocol {
         state = .failed(error.localizedDescription)
     }
 
-    private func handlePhotoData(_ data: Data) {
-        let image = UIImage(data: data)
+    private func handlePhotoData(_ data: PhotoData) {
+        let bytes = data.data
+        let image = UIImage(data: bytes)
         let photo = DATCapturedPhoto(
-            jpegData: data,
+            jpegData: bytes,
             capturedAt: Date(),
             width: Int(image?.size.width ?? 0),
             height: Int(image?.size.height ?? 0)
