@@ -1,13 +1,21 @@
 #!/usr/bin/env bash
 #
 # scripts/clean-rebuild.sh
-# Wipes all SPM/Xcode caches for this project so a clean build picks up
-# the current package URL. Run this if you see a stale "Authentication
-# failed" or any other SPM error referencing an outdated package URL.
 #
-# After running this, you MUST also:
-#   1. Open the project:  open -a Xcode RayBanMiniMax.xcodeproj
-#   2. File → Packages → Reset Package Caches
+# Wipes all stale state for the RayBan AI project so a clean build picks
+# up the current package URL. The "Authentication failed" SPM error from
+# an outdated package URL can be cached in three places:
+#
+#   1. Xcode's DerivedData for this project
+#   2. SPM's global cache (~/Library/Caches/org.swift.swiftpm/)
+#   3. The per-user xcuserdata (e.g. UserInterfaceState.xcuserstate
+#      caches the "Recent Issues" panel that shows the stale error)
+#
+# This script wipes all three. Run it when SPM errors look stale.
+#
+# After running, you MUST also:
+#   1. Quit Xcode completely (⌘Q — closing the window is not enough)
+#   2. Reopen:  open -a Xcode RayBanMiniMax.xcodeproj
 #   3. Product → Clean Build Folder (⇧⌘K)
 #   4. Product → Build (⌘B)
 #
@@ -19,9 +27,13 @@ cd "$(dirname "$0")/.."
 echo "==> 1. Wiping project-local SPM artifacts"
 rm -rf .build .swiftpm
 find . -maxdepth 3 -name "Package.resolved" -not -path "./.git/*" -delete 2>/dev/null || true
-find . -name "*.xcworkspace" -not -path "./.git/*" -not -path "./RayBanMiniMax.xcodeproj/*" -exec rm -rf {} + 2>/dev/null || true
 
-echo "==> 2. Wiping Xcode DerivedData for this project"
+echo "==> 2. Wiping xcuserdata (this is where the 'Recent Issues' panel caches)"
+rm -rf RayBanMiniMax.xcodeproj/xcuserdata/ 2>/dev/null || true
+rm -rf RayBanMiniMax.xcodeproj/project.xcworkspace/xcuserdata/ 2>/dev/null || true
+rm -rf RayBanMiniMax.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/ 2>/dev/null || true
+
+echo "==> 3. Wiping Xcode DerivedData for this project"
 for DD in ~/Library/Developer/Xcode/DerivedData/RayBanMiniMax-*; do
   if [ -d "$DD" ]; then
     echo "    removing $DD"
@@ -29,7 +41,7 @@ for DD in ~/Library/Developer/Xcode/DerivedData/RayBanMiniMax-*; do
   fi
 done
 
-echo "==> 3. Wiping SPM global cache (forces re-fetch of package metadata)"
+echo "==> 4. Wiping SPM global cache (forces re-fetch of package metadata)"
 for d in manifests package-metadata repositories; do
   if [ -d ~/Library/Caches/org.swift.swiftpm/$d ]; then
     echo "    removing ~/Library/Caches/org.swift.swiftpm/$d"
@@ -38,20 +50,18 @@ for d in manifests package-metadata repositories; do
 done
 rm -f ~/Library/Caches/org.swift.swiftpm/package-collection.db*
 
-echo "==> 4. Regenerating Xcode project from project.yml"
+echo "==> 5. Regenerating Xcode project from project.yml"
 xcodegen generate
 
 echo ""
 echo "================================================================"
-echo "  Done. Now do the following in Xcode:"
+echo "  Done. Now do the following:"
 echo "================================================================"
-echo "  1. open -a Xcode RayBanMiniMax.xcodeproj"
-echo "  2. Wait for the project to open"
-echo "  3. File → Packages → Reset Package Caches"
-echo "  4. File → Packages → Resolve Package Versions"
-echo "     (this should now successfully fetch facebook/meta-wearables-dat-ios)"
-echo "  5. Product → Clean Build Folder (⇧⌘K)"
-echo "  6. Product → Build (⌘B)"
+echo "  1. QUIT Xcode completely (⌘Q) — closing the window is not enough"
+echo "  2. open -a Xcode RayBanMiniMax.xcodeproj"
+echo "  3. Wait for Xcode to finish indexing"
+echo "  4. Product → Clean Build Folder (⇧⌘K)"
+echo "  5. Product → Build (⌘B)"
 echo ""
-echo "  If the build still shows the old 'meta-quest/MetaWearables-SDK-iOS' error,"
-echo "  it means Xcode is showing a STALE error. Quit Xcode (⌘Q) and reopen."
+echo "  The first build will take a few minutes because SPM needs to"
+echo "  re-download the MetaWearables SDK (facebook/meta-wearables-dat-ios @ 0.8.0)."
