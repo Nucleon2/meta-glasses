@@ -362,7 +362,6 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = RayBanMiniMax/App/Info.plist;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -454,7 +453,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.minimax.rayban.RayBanMiniMaxTests;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RayBanMiniMax.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/RayBanMiniMax";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RayBanMiniMax.app/RayBanMiniMax";
 			};
 			name = Debug;
 		};
@@ -466,7 +465,6 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = RayBanMiniMax/App/Info.plist;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -551,7 +549,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.minimax.rayban.RayBanMiniMaxTests;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RayBanMiniMax.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/RayBanMiniMax";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RayBanMiniMax.app/RayBanMiniMax";
 			};
 			name = Release;
 		};
