@@ -1,0 +1,77 @@
+name: RayBanMiniMax
+options:
+  bundleIdPrefix: com.minimax.rayban
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+  defaultConfig: Debug
+  groupSortPosition: top
+  generateEmptyDirectories: true
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+    DEVELOPMENT_TEAM: ""
+    CODE_SIGN_STYLE: Automatic
+    ENABLE_USER_SCRIPT_SANDBOXING: NO
+packages:
+  MetaWearables:
+    url: https://github.com/meta-quest/MetaWearables-SDK-iOS
+    from: "1.0.0"
+targets:
+  RayBanMiniMax:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: RayBanMiniMax
+        excludes:
+          - "**/.DS_Store"
+    resources:
+      - path: RayBanMiniMax/Resources
+    info:
+      path: RayBanMiniMax/App/Info.plist
+      properties:
+        CFBundleDisplayName: RayBan AI
+        CFBundleShortVersionString: "1.0"
+        CFBundleVersion: "1"
+        UILaunchScreen:
+          UIColorName: AccentColor
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        UIBackgroundModes:
+          - audio
+          - bluetooth-central
+        NSMicrophoneUsageDescription: "RayBan AI needs microphone access to capture your voice through the glasses for AI queries."
+        NSCameraUsageDescription: "RayBan AI needs camera access to receive the live view from your Ray-Ban Meta glasses."
+        NSSpeechRecognitionUsageDescription: "RayBan AI uses speech recognition to convert your spoken queries into text for the AI assistant."
+        NSBluetoothAlwaysUsageDescription: "RayBan AI uses Bluetooth to connect to your Ray-Ban Meta glasses."
+        NSBluetoothPeripheralUsageDescription: "RayBan AI uses Bluetooth to connect to your Ray-Ban Meta glasses."
+        NSLocalNetworkUsageDescription: "RayBan AI communicates with your Ray-Ban Meta glasses on the local network."
+        MINIMAX_API_KEY: "$(MINIMAX_API_KEY)"
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.minimax.rayban.RayBanMiniMax
+        TARGETED_DEVICE_FAMILY: "1,2"
+        GENERATE_INFOPLIST_FILE: NO
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+    dependencies:
+      - package: MetaWearables
+  RayBanMiniMaxTests:
+    type: bundle.unit-test
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: RayBanMiniMaxTests
+    dependencies:
+      - target: RayBanMiniMax
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.minimax.rayban.RayBanMiniMaxTests
+        GENERATE_INFOPLIST_FILE: YES
+        BUNDLE_LOADER: "$(TEST_HOST)"
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/RayBanMiniMax.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/RayBanMiniMax"
