@@ -184,7 +184,7 @@ final class SpeechRecognizer: ObservableObject {
                     self.endFeed()
                 }
             }
-            if let error != nil {
+            if error != nil {
                 self.endFeed()
             }
         }

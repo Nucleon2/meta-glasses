@@ -65,3 +65,7 @@ fastlane/test_output
 Config.plist
 *.local
 .env
+
+# xcodeproj user state (keep the project.pbxproj but ignore user data)
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/

@@ -1,0 +1,610 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		15F6E99F15F8F88AC2C6233C /* PCMConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03815771EAFAF2F72BD38511 /* PCMConverter.swift */; };
+		301EC84E02BDF35C4BEC57B7 /* HexDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23FA62C6C51FA8CB47BC850A /* HexDecoder.swift */; };
+		34614FA96479B9DD537D0C19 /* MiniMaxModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE83B5574084C2F8C3160DB8 /* MiniMaxModels.swift */; };
+		42D11317D5A05298335C228A /* MetaWearables in Frameworks */ = {isa = PBXBuildFile; productRef = 16F618A6FF9C02A3DD676FD4 /* MetaWearables */; };
+		538BA9A5DC37527B9AD6A923 /* MiniMaxClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EB16A7C9E1C75623CEB8CB6 /* MiniMaxClient.swift */; };
+		6866398FB3D4A3ABB06A9A89 /* PCMConverterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A72967B8CC7ADC16C73799C /* PCMConverterTests.swift */; };
+		6F22DC2B5D0F3DF2E53CF8C4 /* MiniMaxClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E237636CDBA504F27786912 /* MiniMaxClientTests.swift */; };
+		70F8D19C042BF13DD29C4331 /* CameraPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09E336F8611FA63AB930CC3A /* CameraPipeline.swift */; };
+		8A4A25E727DABC9CEC9467C2 /* CameraPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB1E82E6EFF9C458AB37E469 /* CameraPreviewView.swift */; };
+		969D481D327067EE4DDE9189 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10879607614DAF93A1FB921F /* ContentView.swift */; };
+		A09E55130180CAE82AF2D460 /* HexDecoderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC35E8A6FD5ECC4AE436C1C3 /* HexDecoderTests.swift */; };
+		A1DE4B50CE3F56DFD624A6EF /* ToolRegistryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9B4AD4086D2FE7E66395AE0 /* ToolRegistryTests.swift */; };
+		A6AD168763344303DDA6DC8E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0BDACFA9F003CB0B52EC4230 /* Assets.xcassets */; };
+		A71B1EFA8E11DBFE0D712EAD /* AudioPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE162C7B141834CCFB729948 /* AudioPipeline.swift */; };
+		B00ADBFCC5E10FF3A888C592 /* APIConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08499C484B475F5A5D125377 /* APIConfig.swift */; };
+		B0E500C809311CC528E4212C /* DATBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2DC4315BDD3AA7A1FC92B67 /* DATBridge.swift */; };
+		C2D50F814FAC6D51FECD1DAB /* ConversationStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19519C46061BEC489C461907 /* ConversationStore.swift */; };
+		C6F6F62FC9218093014ABA5B /* RayBanMiniMaxApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 918F5419559CBE6D818A27CA /* RayBanMiniMaxApp.swift */; };
+		CE7A44687398D561808401F5 /* SpeechRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92E37646A63DCF23ED26E4C0 /* SpeechRecognizer.swift */; };
+		D02150A33979334FB64346DD /* SessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C61606FFF084B2A3FB736654 /* SessionManager.swift */; };
+		D139382D8D042B28C711B15F /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5179070CAE27BCA0E085012 /* Logger.swift */; };
+		D239CD8BDF570074E7414952 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A1B55A4A9B70D5362D6AEE /* AppSettings.swift */; };
+		D8ACA6B61B4F5B19520F8E85 /* ToolRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A38963A21ADCDD5753EE4B5 /* ToolRegistry.swift */; };
+		F79D024FEC97C6B95AB2B884 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7E21D2C16858D7E3745F967 /* SettingsView.swift */; };
+		FB15BE0FF115166116425E20 /* ConnectionStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58DB429E72FA0C7080B29CDE /* ConnectionStatusView.swift */; };
+		FC281B769AAD4836B293EC39 /* SystemPrompts.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8B3619358406FD0BE46E7E2 /* SystemPrompts.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		E164CBE507CFD0A3A701ABA9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6479065D2F82EB0745BED731 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5AD6CD2D6D5B0FBFF3B327D7;
+			remoteInfo = RayBanMiniMax;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		03815771EAFAF2F72BD38511 /* PCMConverter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCMConverter.swift; sourceTree = "<group>"; };
+		08499C484B475F5A5D125377 /* APIConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIConfig.swift; sourceTree = "<group>"; };
+		09E336F8611FA63AB930CC3A /* CameraPipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPipeline.swift; sourceTree = "<group>"; };
+		0A72967B8CC7ADC16C73799C /* PCMConverterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCMConverterTests.swift; sourceTree = "<group>"; };
+		0BDACFA9F003CB0B52EC4230 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		0E237636CDBA504F27786912 /* MiniMaxClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiniMaxClientTests.swift; sourceTree = "<group>"; };
+		10879607614DAF93A1FB921F /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		19519C46061BEC489C461907 /* ConversationStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationStore.swift; sourceTree = "<group>"; };
+		1BD5603988A1A0E5A9956FFD /* RayBanMiniMaxTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = RayBanMiniMaxTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		23FA62C6C51FA8CB47BC850A /* HexDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HexDecoder.swift; sourceTree = "<group>"; };
+		58DB429E72FA0C7080B29CDE /* ConnectionStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionStatusView.swift; sourceTree = "<group>"; };
+		5EB16A7C9E1C75623CEB8CB6 /* MiniMaxClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiniMaxClient.swift; sourceTree = "<group>"; };
+		7A38963A21ADCDD5753EE4B5 /* ToolRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolRegistry.swift; sourceTree = "<group>"; };
+		84A1B55A4A9B70D5362D6AEE /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
+		918F5419559CBE6D818A27CA /* RayBanMiniMaxApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RayBanMiniMaxApp.swift; sourceTree = "<group>"; };
+		92E37646A63DCF23ED26E4C0 /* SpeechRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechRecognizer.swift; sourceTree = "<group>"; };
+		A7E21D2C16858D7E3745F967 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		AC35E8A6FD5ECC4AE436C1C3 /* HexDecoderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HexDecoderTests.swift; sourceTree = "<group>"; };
+		B2DC4315BDD3AA7A1FC92B67 /* DATBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DATBridge.swift; sourceTree = "<group>"; };
+		BE83B5574084C2F8C3160DB8 /* MiniMaxModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiniMaxModels.swift; sourceTree = "<group>"; };
+		C61606FFF084B2A3FB736654 /* SessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionManager.swift; sourceTree = "<group>"; };
+		D5179070CAE27BCA0E085012 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
+		DE162C7B141834CCFB729948 /* AudioPipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPipeline.swift; sourceTree = "<group>"; };
+		E65B98EC54A9E6B049B2EB43 /* RayBanMiniMax.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = RayBanMiniMax.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E8B3619358406FD0BE46E7E2 /* SystemPrompts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemPrompts.swift; sourceTree = "<group>"; };
+		EB1E82E6EFF9C458AB37E469 /* CameraPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPreviewView.swift; sourceTree = "<group>"; };
+		F8F7BB7C99935F1082A6B1AE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		F9B4AD4086D2FE7E66395AE0 /* ToolRegistryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolRegistryTests.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		AD92F57CD7E071CA901F0514 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				42D11317D5A05298335C228A /* MetaWearables in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		0C25AD0603B6FFFA37BE989C /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				84A1B55A4A9B70D5362D6AEE /* AppSettings.swift */,
+				DE162C7B141834CCFB729948 /* AudioPipeline.swift */,
+				09E336F8611FA63AB930CC3A /* CameraPipeline.swift */,
+				B2DC4315BDD3AA7A1FC92B67 /* DATBridge.swift */,
+				C61606FFF084B2A3FB736654 /* SessionManager.swift */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		4494723B14D7C91BEEAFC06A /* RayBanMiniMax */ = {
+			isa = PBXGroup;
+			children = (
+				FADF1D8A04C9054D9D751111 /* AI */,
+				CD384D1DD53C8144CA3979EE /* API */,
+				F5B500BD64DDB76E549094A0 /* App */,
+				0C25AD0603B6FFFA37BE989C /* Core */,
+				8D9D9A7DAD8CE2450D1B4FA2 /* Resources */,
+				E3B100A26717CE752F9BDC3B /* STT */,
+				E501A074A386B7A139DB2755 /* UI */,
+				BECAC49DE4D885BE8F431BA4 /* Utils */,
+			);
+			path = RayBanMiniMax;
+			sourceTree = "<group>";
+		};
+		5688A127B263380A17A8F728 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E65B98EC54A9E6B049B2EB43 /* RayBanMiniMax.app */,
+				1BD5603988A1A0E5A9956FFD /* RayBanMiniMaxTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		5A11409EF2A64FDD67ED2CCE /* RayBanMiniMaxTests */ = {
+			isa = PBXGroup;
+			children = (
+				AC35E8A6FD5ECC4AE436C1C3 /* HexDecoderTests.swift */,
+				0E237636CDBA504F27786912 /* MiniMaxClientTests.swift */,
+				0A72967B8CC7ADC16C73799C /* PCMConverterTests.swift */,
+				F9B4AD4086D2FE7E66395AE0 /* ToolRegistryTests.swift */,
+			);
+			path = RayBanMiniMaxTests;
+			sourceTree = "<group>";
+		};
+		8D9D9A7DAD8CE2450D1B4FA2 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				0BDACFA9F003CB0B52EC4230 /* Assets.xcassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		BECAC49DE4D885BE8F431BA4 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				23FA62C6C51FA8CB47BC850A /* HexDecoder.swift */,
+				D5179070CAE27BCA0E085012 /* Logger.swift */,
+				03815771EAFAF2F72BD38511 /* PCMConverter.swift */,
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
+		CD384D1DD53C8144CA3979EE /* API */ = {
+			isa = PBXGroup;
+			children = (
+				08499C484B475F5A5D125377 /* APIConfig.swift */,
+				5EB16A7C9E1C75623CEB8CB6 /* MiniMaxClient.swift */,
+				BE83B5574084C2F8C3160DB8 /* MiniMaxModels.swift */,
+			);
+			path = API;
+			sourceTree = "<group>";
+		};
+		DE39C56166B6B746C52C50E0 = {
+			isa = PBXGroup;
+			children = (
+				4494723B14D7C91BEEAFC06A /* RayBanMiniMax */,
+				5A11409EF2A64FDD67ED2CCE /* RayBanMiniMaxTests */,
+				5688A127B263380A17A8F728 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		E3B100A26717CE752F9BDC3B /* STT */ = {
+			isa = PBXGroup;
+			children = (
+				92E37646A63DCF23ED26E4C0 /* SpeechRecognizer.swift */,
+			);
+			path = STT;
+			sourceTree = "<group>";
+		};
+		E501A074A386B7A139DB2755 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				EB1E82E6EFF9C458AB37E469 /* CameraPreviewView.swift */,
+				58DB429E72FA0C7080B29CDE /* ConnectionStatusView.swift */,
+				10879607614DAF93A1FB921F /* ContentView.swift */,
+				A7E21D2C16858D7E3745F967 /* SettingsView.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		F5B500BD64DDB76E549094A0 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				F8F7BB7C99935F1082A6B1AE /* Info.plist */,
+				918F5419559CBE6D818A27CA /* RayBanMiniMaxApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		FADF1D8A04C9054D9D751111 /* AI */ = {
+			isa = PBXGroup;
+			children = (
+				19519C46061BEC489C461907 /* ConversationStore.swift */,
+				E8B3619358406FD0BE46E7E2 /* SystemPrompts.swift */,
+				7A38963A21ADCDD5753EE4B5 /* ToolRegistry.swift */,
+			);
+			path = AI;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		5AD6CD2D6D5B0FBFF3B327D7 /* RayBanMiniMax */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 775F8A0E09C354EB5B7D438D /* Build configuration list for PBXNativeTarget "RayBanMiniMax" */;
+			buildPhases = (
+				1A33C972225346665261207A /* Sources */,
+				8C0E3AF984433299A7A72F06 /* Resources */,
+				AD92F57CD7E071CA901F0514 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = RayBanMiniMax;
+			packageProductDependencies = (
+				16F618A6FF9C02A3DD676FD4 /* MetaWearables */,
+			);
+			productName = RayBanMiniMax;
+			productReference = E65B98EC54A9E6B049B2EB43 /* RayBanMiniMax.app */;
+			productType = "com.apple.product-type.application";
+		};
+		9EA3180B037AA3A812F374EB /* RayBanMiniMaxTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 96A5F9AF8FE27E861FF07167 /* Build configuration list for PBXNativeTarget "RayBanMiniMaxTests" */;
+			buildPhases = (
+				D0E63F7D5D2A35BC9ADE45A5 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				AF936E060C00B6C430F6DF5D /* PBXTargetDependency */,
+			);
+			name = RayBanMiniMaxTests;
+			packageProductDependencies = (
+			);
+			productName = RayBanMiniMaxTests;
+			productReference = 1BD5603988A1A0E5A9956FFD /* RayBanMiniMaxTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		6479065D2F82EB0745BED731 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					5AD6CD2D6D5B0FBFF3B327D7 = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
+					9EA3180B037AA3A812F374EB = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = A5118E42C2FA110518D01391 /* Build configuration list for PBXProject "RayBanMiniMax" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = DE39C56166B6B746C52C50E0;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				74F6CD5D5B68A3F7EDBEC440 /* XCRemoteSwiftPackageReference "MetaWearables-SDK-iOS" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 5688A127B263380A17A8F728 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				5AD6CD2D6D5B0FBFF3B327D7 /* RayBanMiniMax */,
+				9EA3180B037AA3A812F374EB /* RayBanMiniMaxTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		8C0E3AF984433299A7A72F06 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A6AD168763344303DDA6DC8E /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		1A33C972225346665261207A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B00ADBFCC5E10FF3A888C592 /* APIConfig.swift in Sources */,
+				D239CD8BDF570074E7414952 /* AppSettings.swift in Sources */,
+				A71B1EFA8E11DBFE0D712EAD /* AudioPipeline.swift in Sources */,
+				70F8D19C042BF13DD29C4331 /* CameraPipeline.swift in Sources */,
+				8A4A25E727DABC9CEC9467C2 /* CameraPreviewView.swift in Sources */,
+				FB15BE0FF115166116425E20 /* ConnectionStatusView.swift in Sources */,
+				969D481D327067EE4DDE9189 /* ContentView.swift in Sources */,
+				C2D50F814FAC6D51FECD1DAB /* ConversationStore.swift in Sources */,
+				B0E500C809311CC528E4212C /* DATBridge.swift in Sources */,
+				301EC84E02BDF35C4BEC57B7 /* HexDecoder.swift in Sources */,
+				D139382D8D042B28C711B15F /* Logger.swift in Sources */,
+				538BA9A5DC37527B9AD6A923 /* MiniMaxClient.swift in Sources */,
+				34614FA96479B9DD537D0C19 /* MiniMaxModels.swift in Sources */,
+				15F6E99F15F8F88AC2C6233C /* PCMConverter.swift in Sources */,
+				C6F6F62FC9218093014ABA5B /* RayBanMiniMaxApp.swift in Sources */,
+				D02150A33979334FB64346DD /* SessionManager.swift in Sources */,
+				F79D024FEC97C6B95AB2B884 /* SettingsView.swift in Sources */,
+				CE7A44687398D561808401F5 /* SpeechRecognizer.swift in Sources */,
+				FC281B769AAD4836B293EC39 /* SystemPrompts.swift in Sources */,
+				D8ACA6B61B4F5B19520F8E85 /* ToolRegistry.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D0E63F7D5D2A35BC9ADE45A5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A09E55130180CAE82AF2D460 /* HexDecoderTests.swift in Sources */,
+				6F22DC2B5D0F3DF2E53CF8C4 /* MiniMaxClientTests.swift in Sources */,
+				6866398FB3D4A3ABB06A9A89 /* PCMConverterTests.swift in Sources */,
+				A1DE4B50CE3F56DFD624A6EF /* ToolRegistryTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		AF936E060C00B6C430F6DF5D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5AD6CD2D6D5B0FBFF3B327D7 /* RayBanMiniMax */;
+			targetProxy = E164CBE507CFD0A3A701ABA9 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		10182941F8F1D2973A952D0C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = RayBanMiniMax/App/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.minimax.rayban.RayBanMiniMax;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		3E768144FA6A14FE701A791C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Debug;
+		};
+		6BC5500C0F7CED7D79B543C7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.minimax.rayban.RayBanMiniMaxTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RayBanMiniMax.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/RayBanMiniMax";
+			};
+			name = Debug;
+		};
+		7751341B7B87A3C746A84BD0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = RayBanMiniMax/App/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.minimax.rayban.RayBanMiniMax;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		E280EDA10F095628CC175F19 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Release;
+		};
+		E4E430B033567DB4FA7A6DD0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.minimax.rayban.RayBanMiniMaxTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RayBanMiniMax.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/RayBanMiniMax";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		775F8A0E09C354EB5B7D438D /* Build configuration list for PBXNativeTarget "RayBanMiniMax" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				10182941F8F1D2973A952D0C /* Debug */,
+				7751341B7B87A3C746A84BD0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		96A5F9AF8FE27E861FF07167 /* Build configuration list for PBXNativeTarget "RayBanMiniMaxTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6BC5500C0F7CED7D79B543C7 /* Debug */,
+				E4E430B033567DB4FA7A6DD0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		A5118E42C2FA110518D01391 /* Build configuration list for PBXProject "RayBanMiniMax" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3E768144FA6A14FE701A791C /* Debug */,
+				E280EDA10F095628CC175F19 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		74F6CD5D5B68A3F7EDBEC440 /* XCRemoteSwiftPackageReference "MetaWearables-SDK-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/meta-quest/MetaWearables-SDK-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		16F618A6FF9C02A3DD676FD4 /* MetaWearables */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 74F6CD5D5B68A3F7EDBEC440 /* XCRemoteSwiftPackageReference "MetaWearables-SDK-iOS" */;
+			productName = MetaWearables;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 6479065D2F82EB0745BED731 /* Project object */;
+}
