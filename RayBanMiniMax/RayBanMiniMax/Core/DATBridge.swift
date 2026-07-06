@@ -4,40 +4,76 @@
 //
 //  Thin wrapper around Meta's official Wearables Device Access Toolkit
 //  (https://github.com/facebook/meta-wearables-dat-ios, modules MWDATCore +
-//  MWDATCamera).
+//  MWDATCamera). Types verified against the actual SDK 0.8.0
+//  .swiftinterface files on disk.
 //
-//  What the SDK actually exposes (verified from the upstream CameraAccess
-//  sample, tag 0.8.0):
+//  Verified public surface (from MWDATCore/MWDATCamera swiftinterface):
 //
-//    * `Wearables.shared` singleton (`WearablesInterface`)
-//    * `try Wearables.configure()` once at launch
-//    * `wearables.devicesStream()` -> `AsyncStream<[DeviceIdentifier]>`
-//    * `wearables.registrationStateStream()` -> `AsyncStream<RegistrationState>`
-//    * `wearables.checkPermissionStatus(.camera)` / `requestPermission(.camera)`
-//    * `AutoDeviceSelector(wearables:)` picks the first connected device
-//    * `deviceSession = try await sessionManager.getSession()`
-//    * `let config = StreamConfiguration(videoCodec: .raw,
-//                                        resolution: .low,
-//                                        frameRate: 24)`
-//    * `let stream = try deviceSession.addStream(config: config)`
-//    * `stream.statePublisher.listen { state in ... }` -> `AnyListenerToken`
-//    * `stream.videoFramePublisher.listen { frame in ... }` -> `UIImage`
-//    * `stream.photoDataPublisher.listen { data in ... }` -> `Data`
-//    * `stream.capturePhoto(format: .jpeg)` to trigger a high-res still
+//    Wearables.configure() throws
+//    Wearables.shared : any WearablesInterface
 //
-//  What the SDK does NOT expose (and our integration guide claimed it did):
-//    * No microphone capture from the glasses
-//    * No speaker/PCM playback to the glasses
-//    * No "1 fps JPEG" mode — video is 24 fps raw by default
+//    protocol WearablesInterface : Sendable {
+//      var registrationState: RegistrationState { get }
+//      func addRegistrationStateListener(_:) -> AnyListenerToken
+//      func registrationStateStream() -> AsyncStream<RegistrationState>
+//      func startRegistration() async throws
+//      func handleUrl(_:) async throws -> Bool
+//      func startUnregistration() async throws
+//      func openFirmwareUpdate() async throws
+//      func openDATGlassesAppUpdate() async throws
+//      var devices: [DeviceIdentifier] { get }
+//      func addDevicesListener(_:) -> AnyListenerToken
+//      func devicesStream() -> AsyncStream<[DeviceIdentifier]>
+//      func deviceForIdentifier(_:) -> Device?
+//      func checkPermissionStatus(_:) async throws -> PermissionStatus
+//      func requestPermission(_:) async throws -> PermissionStatus
+//      func createSession(deviceSelector:) throws -> DeviceSession
+//      func deviceStateStream(for:) -> AsyncStream<DeviceState>
+//    }
 //
-//  The AI voice loop therefore uses the *iPhone's* mic + speaker, not the
-//  glasses'. The glasses contribute only vision and the physical capture
-//  button. This is documented honestly in the README.
+//    class AppManager : Sendable { ... }       // provided by AppManager.start()
+//    class DeviceSession : Sendable {
+//      func start() throws
+//      func stop()
+//      var state: DeviceSessionState
+//      var statePublisher, errorPublisher: Announcer<...>
+//      func addStream(config:) throws -> Stream?
+//    }
+//
+//    class Stream : Sendable {
+//      let streamConfiguration: StreamConfiguration
+//      var state: StreamState
+//      var statePublisher:  Announcer<StreamState>
+//      var videoFramePublisher: Announcer<VideoFrame>
+//      var photoDataPublisher:  Announcer<PhotoData>
+//      var errorPublisher:    Announcer<StreamError>
+//      func start()
+//      func stop()
+//      func capturePhoto(format:) -> Bool
+//    }
+//
+//    struct VideoFrame : Sendable {
+//      var sampleBuffer: CMSampleBuffer
+//      func makeUIImage() -> sending UIImage?
+//    }
+//
+//    struct PhotoData : Sendable {
+//      let data: Data
+//      let format: PhotoCaptureFormat
+//    }
+//
+//    enum StreamState : Sendable { stopping, stopped, waitingForDevice,
+//                                  starting, streaming, paused }
+//
+//    enum PhotoCaptureFormat : Sendable { heic, jpeg }
+//    enum VideoCodec         : Sendable { raw, hvc1 }
+//    enum StreamingResolution: Sendable { high, medium, low }
 //
 
 import Foundation
 import AVFoundation
 import UIKit
+import CoreMedia
 
 #if canImport(MWDATCore)
 import MWDATCore
@@ -59,8 +95,6 @@ enum DATConnectionState: Equatable {
     case permissionDenied
 }
 
-/// A JPEG still returned by the glasses' capture button or programmatic
-/// `stream.capturePhoto()` call.
 struct DATCapturedPhoto: Equatable {
     let jpegData: Data
     let capturedAt: Date
@@ -68,8 +102,6 @@ struct DATCapturedPhoto: Equatable {
     let height: Int
 }
 
-/// A single video frame delivered by the live stream. We keep the JPEG
-/// bytes so the AI pipeline can re-encode at a different quality.
 struct DATVideoFrame: Equatable {
     let jpegData: Data
     let capturedAt: Date
@@ -82,28 +114,12 @@ struct DATVideoFrame: Equatable {
 
 @MainActor
 protocol DATBridgeProtocol: AnyObject {
-    /// Configure the SDK (call once at app launch).
     func bootstrap() async
-
-    /// Current connection/registration state.
     var state: DATConnectionState { get }
-
-    /// Request the camera permission required to stream.
     func requestCameraPermission() async -> Bool
-
-    /// Start a 1 fps (or as fast as the SDK allows) video stream from the
-    /// first available device. Frames arrive via the `frameHandler`.
     func startVideoStream(onFrame: @escaping (DATVideoFrame) -> Void) async throws
-
-    /// Stop the active video stream.
     func stopVideoStream()
-
-    /// Programmatically trigger a high-res still capture. Result is delivered
-    /// to the `photoHandler` registered alongside `startVideoStream`, or
-    /// returned synchronously when the stream isn't running.
     func capturePhoto() async throws -> DATCapturedPhoto
-
-    /// Tear everything down. Safe to call multiple times.
     func shutdown()
 }
 
@@ -118,26 +134,28 @@ final class RealDATBridge: DATBridgeProtocol {
 
     private(set) var state: DATConnectionState = .idle
 
-    private let wearables: WearablesInterface
-    private var sessionManager: DeviceSessionManager?
+    private let wearables: any WearablesInterface
     private var deviceSession: DeviceSession?
     private var stream: MWDATCamera.Stream?
     private var frameHandler: ((DATVideoFrame) -> Void)?
 
     // Listener tokens — strong refs so the publishers stay alive.
-    private var stateToken: AnyListenerToken?
-    private var videoToken: AnyListenerToken?
-    private var errorToken: AnyListenerToken?
-    private var photoToken: AnyListenerToken?
+    private var stateToken: (any AnyListenerToken)?
+    private var videoToken: (any AnyListenerToken)?
+    private var errorToken: (any AnyListenerToken)?
+    private var photoToken: (any AnyListenerToken)?
     private var lastPhoto: DATCapturedPhoto?
 
-    // AsyncStream tasks
-    private var deviceStreamTask: Task<Void, Never>?
+    // AsyncStream tasks for registration + device monitoring
     private var registrationTask: Task<Void, Never>?
+    private var devicesTask: Task<Void, Never>?
+
+    private var lastFrameAt: Date?
 
     // MARK: - Init
 
     init() {
+        // `Wearables.shared` returns `any WearablesInterface`
         self.wearables = Wearables.shared
     }
 
@@ -155,23 +173,37 @@ final class RealDATBridge: DATBridgeProtocol {
             return
         }
 
-        // Build the device session manager and monitor devices.
-        sessionManager = DeviceSessionManager(wearables: wearables)
-
+        // Monitor registration state.
         registrationTask = Task { [weak self] in
             guard let self else { return }
             for await registration in self.wearables.registrationStateStream() {
-                switch registration {
-                case .registering:
-                    self.state = .registering
-                case .registered:
-                    self.state = .ready
-                case .unregistered:
-                    self.state = .idle
-                @unknown default:
-                    break
+                await MainActor.run {
+                    self.handleRegistration(registration)
                 }
             }
+        }
+
+        // Monitor device list.
+        devicesTask = Task { [weak self] in
+            guard let self else { return }
+            for await devices in self.wearables.devicesStream() {
+                Logger.info("Devices: \(devices)", category: .session)
+            }
+        }
+
+        state = .ready
+    }
+
+    private func handleRegistration(_ registration: RegistrationState) {
+        switch registration {
+        case .registering:
+            state = .registering
+        case .registered:
+            state = .ready
+        case .unavailable:
+            state = .idle
+        @unknown default:
+            break
         }
     }
 
@@ -199,49 +231,49 @@ final class RealDATBridge: DATBridgeProtocol {
     // MARK: - Streaming
 
     func startVideoStream(onFrame handler: @escaping (DATVideoFrame) -> Void) async throws {
-        guard let sessionManager else {
-            throw NSError(domain: "DATBridge", code: 1,
-                          userInfo: [NSLocalizedDescriptionKey: "Not bootstrapped. Call bootstrap() first."])
-        }
+        self.frameHandler = handler
+
         guard await requestCameraPermission() else {
             throw NSError(domain: "DATBridge", code: 2,
                           userInfo: [NSLocalizedDescriptionKey: "Camera permission denied."])
         }
-        self.frameHandler = handler
 
-        // Get (or create) the device session.
-        let deviceSession: DeviceSession
+        // Create a device session using the auto device selector (picks
+        // the first connected/registered device).
+        let session: DeviceSession
         do {
-            deviceSession = try await sessionManager.getSession()
-        } catch DeviceSessionError.datAppOnTheGlassesUpdateRequired {
-            state = .failed("Glasses firmware is out of date. Please update the Meta AI app on the glasses.")
-            throw DeviceSessionError.datAppOnTheGlassesUpdateRequired
+            session = try wearables.createSession(
+                deviceSelector: AutoDeviceSelector(wearables: wearables)
+            )
         } catch {
-            state = .failed(error.localizedDescription)
+            let desc = String(describing: error)
+            state = .failed(desc)
+            throw error
+        }
+        self.deviceSession = session
+
+        // Start the session (synchronous, throws on failure).
+        do {
+            try session.start()
+        } catch {
+            let desc = String(describing: error)
+            state = .failed("Session start failed: \(desc)")
             throw error
         }
 
-        guard deviceSession.state == .started else {
-            state = .failed("Device session is not ready. Please try again.")
-            throw NSError(domain: "DATBridge", code: 3,
-                          userInfo: [NSLocalizedDescriptionKey: "Device session not started."])
-        }
-
-        // Configure the stream. The DAT SDK streams 24 fps raw video at the
-        // chosen resolution. We down-throttle to ~1 fps in the handler.
+        // Attach a stream. 24 fps raw video at low resolution; we
+        // down-throttle to ~1 fps in the handler.
         let config = StreamConfiguration(
-            videoCodec: VideoCodec.raw,
-            resolution: StreamingResolution.low,
+            videoCodec: .raw,
+            resolution: .low,
             frameRate: 24
         )
-
-        guard let newStream = try deviceSession.addStream(config: config) else {
-            state = .failed("Unable to create stream.")
+        guard let newStream = try session.addStream(config: config) else {
+            state = .failed("Failed to add stream")
             throw NSError(domain: "DATBridge", code: 4,
-                          userInfo: [NSLocalizedDescriptionKey: "Failed to create video stream."])
+                          userInfo: [NSLocalizedDescriptionKey: "addStream returned nil"])
         }
         self.stream = newStream
-        self.deviceSession = deviceSession
         attachListeners(to: newStream)
         newStream.start()
         state = .streaming
@@ -252,6 +284,8 @@ final class RealDATBridge: DATBridgeProtocol {
         clearListeners()
         stream?.stop()
         stream = nil
+        deviceSession?.stop()
+        deviceSession = nil
         if state == .streaming { state = .ready }
         Logger.info("DAT video stream stopped", category: .camera)
     }
@@ -259,22 +293,17 @@ final class RealDATBridge: DATBridgeProtocol {
     // MARK: - Photo capture
 
     func capturePhoto() async throws -> DATCapturedPhoto {
-        // If a stream is running, the photo will arrive via the
-        // photoDataPublisher listener we attached in `attachListeners`.
-        // We poll `lastPhoto` for a short window.
         guard let stream else {
             throw NSError(domain: "DATBridge", code: 5,
-                          userInfo: [NSLocalizedDescriptionKey: "No active stream. Start a video stream first."])
+                          userInfo: [NSLocalizedDescriptionKey: "No active stream."])
         }
-
         lastPhoto = nil
-        let success = stream.capturePhoto(format: PhotoFormat.jpeg)
+        let success = stream.capturePhoto(format: .jpeg)
         if !success {
             throw NSError(domain: "DATBridge", code: 6,
                           userInfo: [NSLocalizedDescriptionKey: "Photo capture rejected by SDK."])
         }
-
-        // Wait up to 3 seconds for the photoDataPublisher to deliver.
+        // Wait up to 3 seconds for the photoData listener to deliver.
         let deadline = Date().addingTimeInterval(3.0)
         while lastPhoto == nil, Date() < deadline {
             try? await Task.sleep(nanoseconds: 50_000_000)
@@ -290,28 +319,27 @@ final class RealDATBridge: DATBridgeProtocol {
 
     private func attachListeners(to stream: MWDATCamera.Stream) {
         stateToken = stream.statePublisher.listen { [weak self] state in
-            Task { @MainActor in
-                self?.handleStreamState(state)
-            }
+            Task { @MainActor in self?.handleStreamState(state) }
         }
         videoToken = stream.videoFramePublisher.listen { [weak self] frame in
-            Task { @MainActor in
-                self?.handleVideoFrame(frame)
-            }
+            Task { @MainActor in self?.handleVideoFrame(frame) }
         }
         errorToken = stream.errorPublisher.listen { [weak self] error in
-            Task { @MainActor in
-                self?.handleError(error)
-            }
+            Task { @MainActor in self?.handleError(error) }
         }
         photoToken = stream.photoDataPublisher.listen { [weak self] data in
-            Task { @MainActor in
-                self?.handlePhotoData(data)
-            }
+            Task { @MainActor in self?.handlePhotoData(data) }
         }
     }
 
     private func clearListeners() {
+        // AnyListenerToken is Sendable; cancelling stops the listener.
+        Task {
+            await stateToken?.cancel()
+            await videoToken?.cancel()
+            await errorToken?.cancel()
+            await photoToken?.cancel()
+        }
         stateToken = nil
         videoToken = nil
         errorToken = nil
@@ -326,7 +354,6 @@ final class RealDATBridge: DATBridgeProtocol {
         case .streaming:
             self.state = .streaming
         case .waitingForDevice, .starting, .stopping, .paused:
-            // Keep the existing connection-level state; the stream is just warming up.
             break
         @unknown default:
             break
@@ -342,29 +369,21 @@ final class RealDATBridge: DATBridgeProtocol {
         }
         lastFrameAt = now
 
-        // `VideoFrame` exposes a `uiImage` and `imageBuffer`; we re-encode
-        // to JPEG at a moderate quality so the bytes are stable for base64.
-        let image = frame.makeUIImage()
-        let jpeg: Data
-        if let image, let encoded = image.jpegData(compressionQuality: 0.7) {
-            jpeg = encoded
-        } else if let data = frame.jpegData {
-            jpeg = data
-        } else {
-            return
-        }
+        // VideoFrame.makeUIImage() returns an optional UIImage.
+        guard let image = frame.makeUIImage() else { return }
+        guard let jpeg = image.jpegData(compressionQuality: 0.7) else { return }
 
         let model = DATVideoFrame(
             jpegData: jpeg,
             capturedAt: now,
-            width: Int(image?.size.width ?? 0),
-            height: Int(image?.size.height ?? 0),
+            width: Int(image.size.width),
+            height: Int(image.size.height),
             uiImage: image
         )
         frameHandler?(model)
     }
 
-    private func handleError(_ error: Error) {
+    private func handleError(_ error: StreamError) {
         Logger.error("DAT stream error: \(error.localizedDescription)", category: .camera)
         state = .failed(error.localizedDescription)
     }
@@ -381,29 +400,21 @@ final class RealDATBridge: DATBridgeProtocol {
         lastPhoto = photo
     }
 
-    private var lastFrameAt: Date?
-
     // MARK: - Shutdown
 
     func shutdown() {
         stopVideoStream()
-        deviceStreamTask?.cancel()
-        deviceStreamTask = nil
         registrationTask?.cancel()
         registrationTask = nil
-        deviceSession = nil
-        sessionManager?.cleanup()
-        sessionManager = nil
+        devicesTask?.cancel()
+        devicesTask = nil
         state = .idle
         Logger.info("DAT bridge shut down", category: .session)
     }
 
     deinit {
-        // We can't safely touch MainActor-isolated state from a non-isolated
-        // deinit, so just cancel the task handles — listeners are dropped
-        // when `self` is released.
-        deviceStreamTask?.cancel()
         registrationTask?.cancel()
+        devicesTask?.cancel()
     }
 }
 
@@ -414,7 +425,7 @@ final class RealDATBridge: DATBridgeProtocol {
 @MainActor
 final class RealDATBridge: DATBridgeProtocol {
     private(set) var state: DATConnectionState = .idle
-    func bootstrap() async { state = .failed("MWDATCore not linked") }
+    func bootstrap() async { state = .failed("MWDATCore/MWDATCamera not linked") }
     func requestCameraPermission() async -> Bool { false }
     func startVideoStream(onFrame: @escaping (DATVideoFrame) -> Void) async throws {
         throw NSError(domain: "DATBridge", code: -1,
@@ -432,8 +443,6 @@ final class RealDATBridge: DATBridgeProtocol {
 
 // MARK: - Facade
 
-/// Singleton facade. The rest of the app talks to this without knowing
-/// whether the real SDK or a simulator is underneath.
 @MainActor
 final class DATBridge: DATBridgeProtocol {
     private let impl: DATBridgeProtocol
@@ -443,7 +452,7 @@ final class DATBridge: DATBridgeProtocol {
         self.impl = RealDATBridge()
         Logger.info("Using real MWDATCore + MWDATCamera", category: .session)
         #else
-        self.impl = RealDATBridge() // stub variant above
+        self.impl = RealDATBridge()
         Logger.warn("MWDAT modules not linked — using stub bridge", category: .session)
         #endif
     }

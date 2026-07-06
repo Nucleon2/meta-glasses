@@ -252,12 +252,16 @@ struct ContentView: View {
         switch session.connection {
         case .idle:
             return "Tap Connect to pair your Ray-Ban Gen 2 glasses."
-        case .connecting:
-            return "Connecting to your glasses…"
-        case .connected:
+        case .configuring:
+            return "Configuring Meta Wearables SDK…"
+        case .registering:
+            return "Registering with Meta…"
+        case .ready:
             return "Connected! Tap Speak to ask a question."
-        case .reconnecting:
-            return "Reconnecting…"
+        case .streaming:
+            return "Live video streaming from glasses."
+        case .permissionDenied:
+            return "Camera permission denied. Open Settings to enable it."
         case .failed(let m):
             return "Couldn't connect: \(m)"
         }

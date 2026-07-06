@@ -19,10 +19,10 @@ struct ConnectionStatusView: View {
                 .overlay(
                     Circle()
                         .stroke(color.opacity(0.5), lineWidth: 6)
-                        .scaleEffect(state == .connecting || state == .reconnecting ? 1.4 : 1.0)
-                        .opacity(state == .connecting || state == .reconnecting ? 0 : 1)
+                        .scaleEffect(isAnimating ? 1.4 : 1.0)
+                        .opacity(isAnimating ? 0 : 1)
                         .animation(
-                            state == .connecting || state == .reconnecting
+                            isAnimating
                                 ? .easeInOut(duration: 1.0).repeatForever(autoreverses: true)
                                 : .default,
                             value: state
@@ -46,13 +46,22 @@ struct ConnectionStatusView: View {
         .accessibilityLabel("Connection status: \(state.label)")
     }
 
+    private var isAnimating: Bool {
+        switch state {
+        case .configuring, .registering: return true
+        default: return false
+        }
+    }
+
     private var color: Color {
         switch state {
-        case .idle:           return .gray
-        case .connecting:     return .yellow
-        case .connected:      return .green
-        case .reconnecting:   return .orange
-        case .failed:         return .red
+        case .idle:               return .gray
+        case .configuring:        return .yellow
+        case .registering:        return .orange
+        case .ready:              return .green
+        case .streaming:          return .green
+        case .permissionDenied:   return .orange
+        case .failed:             return .red
         }
     }
 }
@@ -62,9 +71,11 @@ struct ConnectionStatusView_Previews: PreviewProvider {
     static var previews: some View {
         VStack(spacing: 12) {
             ConnectionStatusView(state: .idle)
-            ConnectionStatusView(state: .connecting)
-            ConnectionStatusView(state: .connected)
-            ConnectionStatusView(state: .reconnecting)
+            ConnectionStatusView(state: .configuring)
+            ConnectionStatusView(state: .registering)
+            ConnectionStatusView(state: .ready)
+            ConnectionStatusView(state: .streaming)
+            ConnectionStatusView(state: .permissionDenied)
             ConnectionStatusView(state: .failed("no SDK"))
         }
         .padding()

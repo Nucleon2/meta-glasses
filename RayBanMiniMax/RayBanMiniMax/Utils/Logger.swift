@@ -33,7 +33,7 @@ enum LogLevel: String {
 /// Centralized logger. Use the static helpers — they are cheap and thread-safe.
 final class Logger {
     /// Set true to mirror all log lines to the console (in addition to os_log).
-    static var echoToConsole: Bool = {
+    nonisolated(unsafe) static var echoToConsole: Bool = {
         #if DEBUG
         return true
         #else
@@ -42,8 +42,8 @@ final class Logger {
     }()
 
     private static let subsystem = "com.minimax.rayban.RayBanMiniMax"
-    private static var osLoggers: [LogCategory: os.Logger] = [:]
-    private static let lock = NSLock()
+    nonisolated(unsafe) private static var osLoggers: [LogCategory: os.Logger] = [:]
+    nonisolated(unsafe) private static let lock = NSLock()
 
     /// Call once at app launch. Safe to call multiple times.
     static func configure() {

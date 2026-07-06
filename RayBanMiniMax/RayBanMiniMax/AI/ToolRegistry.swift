@@ -171,8 +171,8 @@ struct NoteEntry: Identifiable, Codable, Equatable {
 
 /// Tiny on-disk store. Keeps the last 100 notes. Backed by JSON in the
 /// app's Application Support directory.
-final class NoteStore {
-    static let shared = NoteStore()
+final class NoteStore: @unchecked Sendable {
+    nonisolated(unsafe) static let shared = NoteStore()
     private let url: URL
     private let maxNotes = 100
     private let queue = DispatchQueue(label: "NoteStore", qos: .utility)

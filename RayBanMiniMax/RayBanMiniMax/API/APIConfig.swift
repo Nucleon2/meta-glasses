@@ -34,7 +34,7 @@ enum APIConfig {
     private static let apiKeyInfoPlistKey = "MINIMAX_API_KEY"
 
     /// Cached API key. Empty string means "not configured".
-    static var apiKey: String = {
+    nonisolated(unsafe) static var apiKey: String = {
         if let fromInfoPlist = Bundle.main.object(forInfoDictionaryKey: apiKeyInfoPlistKey) as? String,
            !fromInfoPlist.isEmpty,
            !fromInfoPlist.hasPrefix("$") {
